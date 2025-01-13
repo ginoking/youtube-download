@@ -13,8 +13,10 @@ router.post('/download', async function (req, res) {
     // });
     // await downloader.downloadSong(req.body.url);
     const output = 'audio.mp3'; // 输出文件名
-    const stream = ytdl('https://www.youtube.com/watch?v=UQrP7l2AAVk&list=RDUQrP7l2AAVk', { filter: 'audioonly', highWaterMark: 1 << 25  })
-        .pipe(require("fs").createWriteStream(output));
+    const stream = ytdl(
+        'https://www.youtube.com/watch?v=UQrP7l2AAVk&list=RDUQrP7l2AAVk', 
+        { filter: 'audioonly', dlChunkSize: 50 },
+    ).pipe(fs.createWriteStream(output));
 
     ytdl.getBasicInfo("https://www.youtube.com/watch?v=UQrP7l2AAVk&list=RDUQrP7l2AAVk").then(info => {
         console.log(info.videoDetails.title);
@@ -28,7 +30,7 @@ router.post('/download', async function (req, res) {
     // });
 
     stream.on('open', () => {
-        console.log('下载开始');
+        console.log('下載開始');
     });
 
     stream.on('data', (chunk) => {
