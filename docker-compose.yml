@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    tty: true
+    ports:
+      - "80:80"
+    volumes:
+      - ./:/app
