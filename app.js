@@ -27,8 +27,9 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/', downloadRouter);
 app.use('/users', usersRouter);
+app.use('/download', downloadRouter);
+app.use('/', downloadRouter);
 app.disable('etag');
 
 // catch 404 and forward to error handler

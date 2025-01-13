@@ -3,7 +3,7 @@ extends layout
 block content
   h1= title
   p Welcome to #{title}
-  form(action="/download" method="post")
+  form(action="download" method="post")
     p URL: 
-      input(type="text" name="url")
+      input(type="url" name="url")
     button(type="submit") Submit
