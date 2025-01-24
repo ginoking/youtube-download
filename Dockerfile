@@ -1,4 +1,6 @@
-from node:22-alpine
+from nikolaik/python-nodejs:latest
+
+RUN apt-get update && apt-get install -y ffmpeg
 
 WORKDIR /app
 
