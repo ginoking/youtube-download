@@ -1,6 +1,6 @@
 from nikolaik/python-nodejs:latest
 
-RUN apt-get update && apt-get install -y ffmpeg
+RUN apt-get update && apt-get install -y ffmpeg aria2
 
 WORKDIR /app
 

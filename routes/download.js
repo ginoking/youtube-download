@@ -1,8 +1,8 @@
 var express = require('express');
-const https = require("https");
 var router = express.Router();
 const fs = require('fs');
 const youtubedl = require('youtube-dl-exec')
+const { spawn } = require('child_process');
 
 router.post('/download', async function (req, res) {
 
@@ -16,17 +16,46 @@ router.post('/download', async function (req, res) {
         format: 'bestaudio[ext=m4a]',
         addHeader: ['referer:youtube.com', 'user-agent:googlebot'],
         output: '%(title)s.%(ext)s',
-        httpChunkSize: '1M',
-        postprocessorArgs: ['-threads', '4'],
-        externalDownloader: 'aria2c',
-        externalDownloaderArgs: ['--max-connection-per-server=16', '--split=16', '--min-split-size=1M', '--max-concurrent-downloads=16']
+        // httpChunkSize: '1M',
+        // postprocessorArgs: ['-threads', '4'],
+        // externalDownloader: 'aria2c',
+        // externalDownloaderArgs: ['--max-connection-per-server=16', '--split=16', '--min-split-size=1M', '--max-concurrent-downloads=16']
     }).then(info => {
-        https.get(info.url, function (file) {
-            requestedDownloads = info.requested_downloads
-            downloadOption = requestedDownloads[0]
-            res.set('Content-disposition', 'attachment; filename=' + encodeURI(downloadOption.filename));
-            res.set('Content-Type', 'audio/m4a');
-            file.pipe(res);
+        console.log(info.url);
+        const downloadUrl = info.url;
+        // 使用 aria2c 來下載
+        const aria2 = spawn('aria2c', [
+            '--max-connection-per-server=16',
+            '--split=16',
+            '--min-split-size=1M',
+            '--max-concurrent-downloads=16',
+            '-o', `${info.title}.m4a`,  // 設定輸出檔案名稱
+            downloadUrl
+        ]);
+
+        // 監聽下載過程
+        aria2.stdout.on('data', (data) => {
+            console.log(`aria2c: ${data}`);
+        });
+
+        aria2.stderr.on('data', (data) => {
+            console.error(`aria2c 錯誤: ${data}`);
+        });
+
+        aria2.on('close', (code) => {
+            console.log(`aria2c 下載完成，退出碼: ${code}`);
+            res.download(`${info.title}.m4a`, `${info.title}.m4a`, (err) => {
+                if (err) {
+                    console.error('下載錯誤:', err);
+                    res.status(500).send('下載失敗');
+                } else {
+                    fs.unlink(`${info.title}.m4a`, (err) => {
+                        if (err) {
+                            console.error('刪除錯誤:', err);
+                        }
+                    });
+                }
+            });
         });
     }).catch(err => {
         console.error('下載錯誤:', err); // 打印錯誤信息
