@@ -2,8 +2,8 @@ extends layout
 
 block content
   h1= title
-  p Welcome to #{title}
+  p 簡單下載音樂的專案，呵呵
   form(action="download" method="post")
     p URL: 
-      input(type="url" name="url")
-    button(type="submit") Submit
+      input(type="url" name="url" placeholder="輸入網址" style="width: 25%;")
+    button(type="submit") 下載
