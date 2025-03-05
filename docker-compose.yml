@@ -8,3 +8,14 @@ services:
       - "80:80"
     volumes:
       - ./:/app
+    networks:
+      - vpcbr
+  # redis:
+  #   image: redis:latest
+  #   ports:
+  #     - 6379:6379
+  #   networks:
+  #     - vpcbr
+networks:
+  vpcbr:
+    driver: bridge
