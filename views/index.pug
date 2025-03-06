@@ -1,9 +1,13 @@
 extends layout
 block content
-  img(src="/images/youtubelogo.svg", alt="logo", class="youtube-logo")
-  h1= title
-  p 簡單下載音樂的專案，呵呵
   form(action="download" method="post")
-    p URL: 
-      input(type="url" name="url" placeholder="輸入網址" style="width: 25%;")
-    button(type="submit") 下載
+    .card
+      img(src="/images/youtubelogo.svg", alt="logo", class="youtube-logo")
+      h1= title
+      p 簡單下載音樂的專案，呵呵
+      .input
+        input.input__field(name="url", type="url", placeholder=" " required)
+        span.input__label 輸入Youtube網址
+      .button-group
+        button(type="submit") 下載
+
