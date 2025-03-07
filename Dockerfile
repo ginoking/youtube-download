@@ -10,8 +10,8 @@ RUN npm install -g nodemon
 
 RUN npm install
 
-COPY . .
+COPY . ./
 
-EXPOSE $PORT
+EXPOSE 8080
 
 CMD ["npm", "start"]
