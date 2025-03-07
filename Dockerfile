@@ -10,6 +10,8 @@ RUN npm install -g nodemon
 
 RUN npm install
 
+EXPOSE $PORT
+
 COPY . .
 
-CMD ["npm", "run", "dev"]
+# CMD ["npm", "run", "dev"]
