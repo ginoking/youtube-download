@@ -10,7 +10,7 @@ RUN npm install -g nodemon
 
 RUN npm install
 
-COPY . ./
+COPY . ./app
 
 EXPOSE $PORT
 
