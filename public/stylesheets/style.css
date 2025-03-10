@@ -107,6 +107,8 @@ button {
   border: none;
   border-radius: var(--size-radius);
   font-weight: 900;
+  font-size: 1rem;
+  letter-spacing: 0.2em;
 }
 
 .error {

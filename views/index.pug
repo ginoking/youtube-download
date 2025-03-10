@@ -11,7 +11,7 @@ block content
 				
 			.input
 				textarea.input__field(name="url", type="url", placeholder=" " required)
-				span.input__label 輸入Youtube網址
+				span.input__label(onclick="document.querySelector('textarea').focus();") 輸入Youtube網址 
+				
 			.button-group
 				button(type="submit") 下載
-
