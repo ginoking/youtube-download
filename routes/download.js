@@ -52,6 +52,8 @@ router.post('/download', async function (req, res) {
             '--split=16',
             '--min-split-size=1M',
             '--max-concurrent-downloads=16',
+            '--retry-wait', '5',  // 添加重试等待时间
+            '--max-tries', '5',    // 添加最大重试次数
             '-o', `${info.title}.m4a`,  // 設定輸出檔案名稱
             downloadUrl
         ]);
