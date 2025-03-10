@@ -1,0 +1,14 @@
+extends layout
+block content
+    form(action="check" method="post")
+        .card
+            h1 阿金的生日
+            if error
+                .error 欸，太不了解了吧?!
+            .input
+                input.input__field(name="birthday", type="date", placeholder=" " required value="1997-03-26")
+                span.input__label 請輸入阿金的生日
+            .button-group
+                button(type="submit") 確認
+
+

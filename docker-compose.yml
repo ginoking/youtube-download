@@ -10,6 +10,8 @@ services:
       - ./:/app
     environment:
       - PORT=80
+      - BIRTHDAY=1997-03-26
+      - SESSION_SECRET=secret
     # networks:
     #   - vpcbr
   # redis:

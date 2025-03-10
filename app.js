@@ -1,11 +1,12 @@
 var createError = require('http-errors');
 var express = require('express');
+var session = require('express-session');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+// routes
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
 var downloadRouter = require('./routes/download');
 
 var app = express();
@@ -15,6 +16,13 @@ const port = process.env.PORT || 8080 ;
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
+
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+    cookie: { maxAge: 1000 * 60 * 60 } // 1小時
+}));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -27,8 +35,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
-app.use('/download', downloadRouter);
 app.use('/', downloadRouter);
 app.disable('etag');
 

@@ -4,7 +4,30 @@ const fs = require('fs');
 const youtubedl = require('youtube-dl-exec')
 const { spawn } = require('child_process');
 
+router.post('/check', async function (req, res) {
+    console.log(req.body.birthday);
+    const birthday = req.body.birthday;
+    if (birthday === process.env.BIRTHDAY) {
+        // session 設定驗證成功，存活時間1小時
+        req.session.verified = true;
+        // req.session.save();
+        return res.redirect('/download');
+    }
+    
+    res.redirect('/?error=1');
+});
+
 router.post('/download', async function (req, res) {
+
+    console.log(req.session.verified);
+    if (!req.session.verified) {
+        return res.redirect('/');
+    }
+
+    // 驗證是否為youtube網址
+    if (!req.body.url.includes('youtube.com')) {
+        return res.redirect('/download?error=2');
+    }
 
     youtubedl(req.body.url, {
         audioQuality: 0,
@@ -64,10 +87,6 @@ router.post('/download', async function (req, res) {
         console.error('錯誤堆棧:', err.stack); // 打印錯誤堆棧
         res.status(500).send(err);
     })
-});
-
-router.get('/download', function (req, res, next) {
-    res.send('download get');
 });
 
 module.exports = router;

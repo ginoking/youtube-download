@@ -1,13 +1,17 @@
 extends layout
 block content
-  form(action="download" method="post")
-    .card
-      img(src="/images/youtubelogo.svg", alt="logo", class="youtube-logo")
-      h1= title
-      p 簡單下載音樂的專案，呵呵
-      .input
-        textarea.input__field(name="url", type="url", placeholder=" " required)
-        span.input__label 輸入Youtube網址
-      .button-group
-        button(type="submit") 下載
+	form(action="download" method="post")
+		.card
+			img(src="/images/youtubelogo.svg", alt="logo", class="youtube-logo")
+			h1= title
+			if error
+				.error 網址有問題啊-.-
+			else
+				p 簡單下載音樂的專案，呵呵
+				
+			.input
+				textarea.input__field(name="url", type="url", placeholder=" " required)
+				span.input__label 輸入Youtube網址
+			.button-group
+				button(type="submit") 下載
 
