@@ -13,12 +13,4 @@ router.get('/download', function(req, res, next) {
   res.render('index', { title: '下載Youtube音樂', error: req.query.error });
 });
 
-// router.get('/test', function(req, res, next) {
-//   // get folder list
-//   const fs = require('fs');
-//   const path = require('path');
-//   const folderList = fs.readdirSync(path.join(__dirname, '/'));
-//   res.json(folderList);
-// });
-
 module.exports = router;

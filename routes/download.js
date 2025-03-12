@@ -24,6 +24,11 @@ router.post('/download', async function (req, res) {
         return res.redirect('/');
     }
 
+    // 驗證是不是網址格式
+    if (!req.body.url.includes('http')) {
+        return res.redirect('/download?error=2');
+    }
+
     // 驗證是否為youtube網址
     if (!req.body.url.includes('youtube.com')) {
         return res.redirect('/download?error=2');
@@ -72,7 +77,7 @@ router.post('/download', async function (req, res) {
             res.download(`${info.title}.m4a`, `${info.title}.m4a`, (err) => {
                 if (err) {
                     console.error('下載錯誤:', err);
-                    res.status(500).send('下載失敗');
+                    return res.redirect('/download?error=2');
                 } else {
                     fs.unlink(`${info.title}.m4a`, (err) => {
                         if (err) {
@@ -87,7 +92,7 @@ router.post('/download', async function (req, res) {
         console.error('錯誤類型:', err.name); // 打印錯誤類型
         console.error('錯誤消息:', err.message); // 打印錯誤消息
         console.error('錯誤堆棧:', err.stack); // 打印錯誤堆棧
-        res.status(500).send(err);
+        return res.redirect('/download?error=2');
     })
 });
 
