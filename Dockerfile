@@ -1,4 +1,4 @@
-from nikolaik/python-nodejs:python3.9-nodejs23-slim
+FROM nikolaik/python-nodejs:python3.12-nodejs23-slim
 
 RUN apt-get update && apt-get install -y ffmpeg aria2
 
