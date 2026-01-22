@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const youtubedl = require('youtube-dl-exec');
+const ytdl = require('@distube/ytdl-core');
 
 router.post('/check', async function (req, res) {
     console.log(req.body.birthday);
@@ -11,7 +11,7 @@ router.post('/check', async function (req, res) {
         // req.session.save();
         return res.redirect('/download');
     }
-    
+
     res.redirect('/?error=1');
 });
 
@@ -28,55 +28,40 @@ router.post('/download', async function (req, res) {
     }
 
     // 驗證是否為youtube網址
-    if (!req.body.url.includes('youtube.com')) {
+    if (!req.body.url.includes('youtube.com') && !req.body.url.includes('youtu.be')) {
         return res.redirect('/download?error=2');
     }
 
-    youtubedl(req.body.url, {
-        dumpSingleJson: true,
-        noCheckCertificates: true,
-        noWarnings: true,
-        format: 'bestaudio[ext=m4a]/bestaudio',
-        extractorArgs: 'youtube:player_client=ios,web',
-    }).then(async (info) => {
-        console.log('取得影片資訊:', info.title);
-        console.log('音訊 URL:', info.url);
+    try {
+        // 取得影片資訊
+        const info = await ytdl.getInfo(req.body.url);
+        console.log('取得影片資訊:', info.videoDetails.title);
 
         // 設定回應標頭
-        const filename = encodeURIComponent(info.title.replace(/[<>:"/\\|?*]/g, '_')) + '.m4a';
+        const filename = encodeURIComponent(info.videoDetails.title.replace(/[<>:"/\\|?*]/g, '_')) + '.m4a';
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
         res.setHeader('Content-Type', 'audio/mp4');
 
-        // 串流轉傳
-        const response = await fetch(info.url, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                'Referer': 'https://www.youtube.com/'
-            }
+        // 直接串流音訊
+        const stream = ytdl(req.body.url, {
+            filter: 'audioonly',
+            quality: 'highestaudio',
         });
 
-        if (!response.ok) {
-            throw new Error(`下載失敗: ${response.status}`);
-        }
+        stream.pipe(res);
 
-        // 使用 Node.js 原生串流
-        const { Readable } = require('stream');
-        const readable = Readable.fromWeb(response.body);
-        readable.pipe(res);
-
-        readable.on('error', (err) => {
+        stream.on('error', (err) => {
             console.error('串流錯誤:', err);
             if (!res.headersSent) {
                 res.redirect('/download?error=2');
             }
         });
-    }).catch(err => {
-        console.error('下載錯誤:', err); // 打印錯誤信息
-        console.error('錯誤類型:', err.name); // 打印錯誤類型
-        console.error('錯誤消息:', err.message); // 打印錯誤消息
-        console.error('錯誤堆棧:', err.stack); // 打印錯誤堆棧
+
+    } catch (err) {
+        console.error('下載錯誤:', err);
+        console.error('錯誤消息:', err.message);
         return res.redirect('/download?error=2');
-    })
+    }
 });
 
 module.exports = router;
