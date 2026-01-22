@@ -37,7 +37,7 @@ router.post('/download', async function (req, res) {
         noCheckCertificates: true,
         noWarnings: true,
         format: 'bestaudio[ext=m4a]/bestaudio',
-        addHeader: ['referer:youtube.com', 'user-agent:googlebot'],
+        extractorArgs: 'youtube:player_client=ios,web',
     }).then(async (info) => {
         console.log('取得影片資訊:', info.title);
         console.log('音訊 URL:', info.url);
