@@ -1,8 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const fs = require('fs');
-const youtubedl = require('youtube-dl-exec')
-const { spawn } = require('child_process');
+const youtubedl = require('youtube-dl-exec');
 
 router.post('/check', async function (req, res) {
     console.log(req.body.birthday);
@@ -35,57 +33,42 @@ router.post('/download', async function (req, res) {
     }
 
     youtubedl(req.body.url, {
-        audioQuality: 0,
         dumpSingleJson: true,
         noCheckCertificates: true,
         noWarnings: true,
-        extractAudio: true,
-        audioFormat: 'm4a',
-        format: 'bestaudio[ext=m4a]',
+        format: 'bestaudio[ext=m4a]/bestaudio',
         addHeader: ['referer:youtube.com', 'user-agent:googlebot'],
-        output: '%(title)s.%(ext)s',
-        // httpChunkSize: '1M',
-        // postprocessorArgs: ['-threads', '4'],
-        // externalDownloader: 'aria2c',
-        // externalDownloaderArgs: ['--max-connection-per-server=16', '--split=16', '--min-split-size=1M', '--max-concurrent-downloads=16']
-    }).then(info => {
-        console.log(info.url);
-        const downloadUrl = info.url;
-        // 使用 aria2c 來下載
-        const aria2 = spawn('aria2c', [
-            '--max-connection-per-server=16',
-            '--split=16',
-            '--min-split-size=1M',
-            '--max-concurrent-downloads=16',
-            '--retry-wait=5',  // 添加重试等待时间
-            '--max-tries=5',    // 添加最大重试次数
-            '-o', `${info.title}.m4a`,  // 設定輸出檔案名稱
-            downloadUrl
-        ]);
+    }).then(async (info) => {
+        console.log('取得影片資訊:', info.title);
+        console.log('音訊 URL:', info.url);
 
-        // 監聽下載過程
-        aria2.stdout.on('data', (data) => {
-            console.log(`aria2c: ${data}`);
+        // 設定回應標頭
+        const filename = encodeURIComponent(info.title.replace(/[<>:"/\\|?*]/g, '_')) + '.m4a';
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Type', 'audio/mp4');
+
+        // 串流轉傳
+        const response = await fetch(info.url, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Referer': 'https://www.youtube.com/'
+            }
         });
 
-        aria2.stderr.on('data', (data) => {
-            console.error(`aria2c 錯誤: ${data}`);
-        });
+        if (!response.ok) {
+            throw new Error(`下載失敗: ${response.status}`);
+        }
 
-        aria2.on('close', (code) => {
-            console.log(`aria2c 下載完成，退出碼: ${code}`);
-            res.download(`${info.title}.m4a`, `${info.title}.m4a`, (err) => {
-                if (err) {
-                    console.error('下載錯誤:', err);
-                    return res.redirect('/download?error=2');
-                } else {
-                    fs.unlink(`${info.title}.m4a`, (err) => {
-                        if (err) {
-                            console.error('刪除錯誤:', err);
-                        }
-                    });
-                }
-            });
+        // 使用 Node.js 原生串流
+        const { Readable } = require('stream');
+        const readable = Readable.fromWeb(response.body);
+        readable.pipe(res);
+
+        readable.on('error', (err) => {
+            console.error('串流錯誤:', err);
+            if (!res.headersSent) {
+                res.redirect('/download?error=2');
+            }
         });
     }).catch(err => {
         console.error('下載錯誤:', err); // 打印錯誤信息
