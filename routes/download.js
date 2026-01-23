@@ -45,7 +45,7 @@ router.post('/download', async function (req, res) {
             body: JSON.stringify({
                 url: req.body.url,
                 downloadMode: 'audio',
-                audioFormat: 'm4a',
+                audioFormat: 'mp3',
             }),
         });
 
@@ -63,13 +63,13 @@ router.post('/download', async function (req, res) {
 
         if (cobaltData.status === 'tunnel' || cobaltData.status === 'redirect') {
             downloadUrl = cobaltData.url;
-            filename = cobaltData.filename || 'audio.m4a';
+            filename = cobaltData.filename || 'audio.mp3';
         } else if (cobaltData.status === 'picker') {
             // 如果有多個選項，取第一個音訊
             const audioItem = cobaltData.picker?.find(item => item.type === 'audio') || cobaltData.picker?.[0];
             if (audioItem) {
                 downloadUrl = audioItem.url;
-                filename = audioItem.filename || 'audio.m4a';
+                filename = audioItem.filename || 'audio.mp3';
             }
         }
 
@@ -92,7 +92,7 @@ router.post('/download', async function (req, res) {
         // 設定回應標頭
         const safeFilename = encodeURIComponent(filename.replace(/[<>:"/\\|?*]/g, '_'));
         res.setHeader('Content-Disposition', `attachment; filename="${safeFilename}"`);
-        res.setHeader('Content-Type', 'audio/mp4');
+        res.setHeader('Content-Type', 'audio/mpeg');
 
         // 如果有 Content-Length，也設定
         const contentLength = downloadResponse.headers.get('content-length');

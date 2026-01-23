@@ -17,6 +17,9 @@ npm start
 
 # Docker 開發
 docker-compose up --build
+
+# Git push（需要用 token）
+git push https://ginoking:<GITHUB_TOKEN>@github.com/ginoking/youtube-download.git master
 ```
 
 ## 環境變數
@@ -24,6 +27,7 @@ docker-compose up --build
 - `PORT` - 伺服器埠號（預設 8080）
 - `BIRTHDAY` - 驗證用的生日密碼
 - `SESSION_SECRET` - Express session 密鑰
+- `COBALT_API_URL` - Cobalt API 位址（預設 `http://localhost:9000`）
 
 ## 架構
 
@@ -36,10 +40,16 @@ docker-compose up --build
 **下載流程：**
 1. 使用者在 `/` 輸入生日 → 驗證成功設定 session
 2. 進入 `/download` 頁面輸入 YouTube 網址
-3. `youtube-dl-exec` 取得音訊 URL
-4. `aria2c` 多連線下載（16 並行連線）
-5. 檔案傳送給使用者後自動刪除
+3. 呼叫 Cobalt API（localhost:9000）取得下載 URL
+4. 串流轉傳音訊給使用者
 
-**系統依賴（Docker 已包含）：**
-- `aria2c` - 高速多連線下載
-- `ffmpeg` - 音訊處理
+## 部署架構
+
+**GCP Cloud Run + Sidecar：**
+- 主容器：Node.js Express 應用程式
+- Sidecar：Cobalt（`ghcr.io/imputnet/cobalt:10`，透過 Artifact Registry 遠端存放區代理）
+- 兩個容器透過 `localhost:9000` 內網通訊
+
+**Cloud Build 觸發器：**
+- push 到 master 會自動觸發 Cloud Build
+- 只更新主容器 image，Cobalt sidecar 設定會保留

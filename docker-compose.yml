@@ -13,6 +13,19 @@ services:
       - PORT=80
       - BIRTHDAY=1997-03-26
       - SESSION_SECRET=secret
+      - COBALT_API_URL=http://cobalt:9000
+    depends_on:
+      - cobalt
+
+  cobalt:
+    image: ghcr.io/imputnet/cobalt:latest
+    init: true
+    ports:
+      - "9000:9000"
+    environment:
+      - API_URL=http://cobalt:9000/
+      - CORS_WILDCARD=1
+      - RATELIMIT_MAX=0
     # networks:
     #   - vpcbr
   # redis:
