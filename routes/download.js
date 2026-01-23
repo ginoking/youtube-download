@@ -1,7 +1,6 @@
 var express = require('express');
 var router = express.Router();
-
-const COBALT_API_URL = process.env.COBALT_API_URL || 'http://localhost:9000';
+const ytdl = require('@distube/ytdl-core');
 
 router.post('/check', async function (req, res) {
     console.log(req.body.birthday);
@@ -9,6 +8,7 @@ router.post('/check', async function (req, res) {
     if (birthday === process.env.BIRTHDAY) {
         // session 設定驗證成功，存活時間1小時
         req.session.verified = true;
+        // req.session.save();
         return res.redirect('/download');
     }
 
@@ -33,79 +33,24 @@ router.post('/download', async function (req, res) {
     }
 
     try {
-        console.log('呼叫 Cobalt API:', COBALT_API_URL);
-
-        // 呼叫 Cobalt API 取得下載資訊
-        const cobaltResponse = await fetch(`${COBALT_API_URL}/`, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                url: req.body.url,
-                downloadMode: 'audio',
-                audioFormat: 'm4a',
-            }),
-        });
-
-        const cobaltData = await cobaltResponse.json();
-        console.log('Cobalt 回應:', cobaltData);
-
-        if (cobaltData.status === 'error') {
-            console.error('Cobalt 錯誤:', cobaltData.error?.code);
-            return res.redirect('/download?error=2');
-        }
-
-        // 取得下載 URL
-        let downloadUrl;
-        let filename;
-
-        if (cobaltData.status === 'tunnel' || cobaltData.status === 'redirect') {
-            downloadUrl = cobaltData.url;
-            filename = cobaltData.filename || 'audio.m4a';
-        } else if (cobaltData.status === 'picker') {
-            // 如果有多個選項，取第一個音訊
-            const audioItem = cobaltData.picker?.find(item => item.type === 'audio') || cobaltData.picker?.[0];
-            if (audioItem) {
-                downloadUrl = audioItem.url;
-                filename = audioItem.filename || 'audio.m4a';
-            }
-        }
-
-        if (!downloadUrl) {
-            console.error('無法取得下載 URL');
-            return res.redirect('/download?error=2');
-        }
-
-        console.log('下載 URL:', downloadUrl);
-        console.log('檔案名稱:', filename);
-
-        // 串流下載內容給用戶
-        const downloadResponse = await fetch(downloadUrl);
-
-        if (!downloadResponse.ok) {
-            console.error('下載失敗:', downloadResponse.status);
-            return res.redirect('/download?error=2');
-        }
+        // 取得影片資訊
+        const info = await ytdl.getInfo(req.body.url);
+        console.log('取得影片資訊:', info.videoDetails.title);
 
         // 設定回應標頭
-        const safeFilename = encodeURIComponent(filename.replace(/[<>:"/\\|?*]/g, '_'));
-        res.setHeader('Content-Disposition', `attachment; filename="${safeFilename}"`);
+        const filename = encodeURIComponent(info.videoDetails.title.replace(/[<>:"/\\|?*]/g, '_')) + '.m4a';
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
         res.setHeader('Content-Type', 'audio/mp4');
 
-        // 如果有 Content-Length，也設定
-        const contentLength = downloadResponse.headers.get('content-length');
-        if (contentLength) {
-            res.setHeader('Content-Length', contentLength);
-        }
+        // 直接串流音訊
+        const stream = ytdl(req.body.url, {
+            filter: 'audioonly',
+            quality: 'highestaudio',
+        });
 
-        // 串流轉傳
-        const { Readable } = require('stream');
-        const nodeStream = Readable.fromWeb(downloadResponse.body);
-        nodeStream.pipe(res);
+        stream.pipe(res);
 
-        nodeStream.on('error', (err) => {
+        stream.on('error', (err) => {
             console.error('串流錯誤:', err);
             if (!res.headersSent) {
                 res.redirect('/download?error=2');
