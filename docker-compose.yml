@@ -1,8 +1,10 @@
-version: '3.8'
-
 services:
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      args:
+        ZSCALER_CERT_PATH: Zscaler_Root_CA.crt
     tty: true
     ports:
       - "80:80"
@@ -13,14 +15,4 @@ services:
       - PORT=80
       - BIRTHDAY=1997-03-26
       - SESSION_SECRET=secret
-    # networks:
-    #   - vpcbr
-  # redis:
-  #   image: redis:latest
-  #   ports:
-  #     - 6379:6379
-  #   networks:
-  #     - vpcbr
-# networks:
-#   vpcbr:
-#     driver: bridge
+      - NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/Zscaler_Root_CA.crt

@@ -1,67 +1,60 @@
 var express = require('express');
 var router = express.Router();
-const ytdl = require('@distube/ytdl-core');
+const { getVideoInfo, downloadAudio } = require('../lib/youtube');
 
 router.post('/check', async function (req, res) {
-    console.log(req.body.birthday);
-    const birthday = req.body.birthday;
-    if (birthday === process.env.BIRTHDAY) {
-        // session 設定驗證成功，存活時間1小時
-        req.session.verified = true;
-        // req.session.save();
-        return res.redirect('/download');
-    }
+	const birthday = req.body.birthday;
 
-    res.redirect('/?error=1');
+	if (birthday === process.env.BIRTHDAY) {
+		req.session.verified = true;
+		return res.redirect('/download');
+	}
+
+	res.redirect('/?error=1');
 });
 
 router.post('/download', async function (req, res) {
+	if (!req.session.verified) {
+		return res.redirect('/');
+	}
 
-    console.log(req.session.verified);
-    if (!req.session.verified) {
-        return res.redirect('/');
-    }
+	const url = req.body.url;
 
-    // 驗證是不是網址格式
-    if (!req.body.url.includes('http')) {
-        return res.redirect('/download?error=2');
-    }
+	// 驗證網址
+	if (!url || !url.includes('http')) {
+		return res.redirect('/download?error=2');
+	}
 
-    // 驗證是否為youtube網址
-    if (!req.body.url.includes('youtube.com') && !req.body.url.includes('youtu.be')) {
-        return res.redirect('/download?error=2');
-    }
+	if (!url.includes('youtube.com') && !url.includes('youtu.be')) {
+		return res.redirect('/download?error=2');
+	}
 
-    try {
-        // 取得影片資訊
-        const info = await ytdl.getInfo(req.body.url);
-        console.log('取得影片資訊:', info.videoDetails.title);
+	try {
+		console.log('開始處理:', url);
 
-        // 設定回應標頭
-        const filename = encodeURIComponent(info.videoDetails.title.replace(/[<>:"/\\|?*]/g, '_')) + '.m4a';
-        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-        res.setHeader('Content-Type', 'audio/mp4');
+		// 取得影片資訊
+		const { title } = await getVideoInfo(url);
 
-        // 直接串流音訊
-        const stream = ytdl(req.body.url, {
-            filter: 'audioonly',
-            quality: 'highestaudio',
-        });
+		const filename =
+			encodeURIComponent(title.replace(/[<>:"/\\|?*]/g, '_')) + '.m4a';
 
-        stream.pipe(res);
+		res.setHeader(
+			'Content-Disposition',
+			`attachment; filename="${filename}"`
+		);
+		res.setHeader('Content-Type', 'audio/mp4');
 
-        stream.on('error', (err) => {
-            console.error('串流錯誤:', err);
-            if (!res.headersSent) {
-                res.redirect('/download?error=2');
-            }
-        });
+		// 下載並串流音訊
+		await downloadAudio(url, res);
 
-    } catch (err) {
-        console.error('下載錯誤:', err);
-        console.error('錯誤消息:', err.message);
-        return res.redirect('/download?error=2');
-    }
+	} catch (err) {
+		console.error('下載錯誤:', err);
+		console.error('錯誤訊息:', err.message);
+
+		if (!res.headersSent) {
+			return res.redirect('/download?error=2');
+		}
+	}
 });
 
 module.exports = router;
