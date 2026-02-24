@@ -19,19 +19,33 @@ router.post('/download', async function (req, res) {
 		return res.redirect('/');
 	}
 
-	const url = req.body.url;
+	let url = req.body.url;
 
-	// 驗證網址
+	// 驗證並清理網址
 	if (!url || !url.includes('http')) {
 		return res.redirect('/download?error=2');
 	}
 
-	if (!url.includes('youtube.com') && !url.includes('youtu.be')) {
-		return res.redirect('/download?error=2');
-	}
-
 	try {
-		console.log('開始處理:', url);
+		// 自動擷取影片 ID，過濾掉播放清單等多餘參數
+		if (url.includes('youtube.com') || url.includes('youtu.be')) {
+			const urlObj = new URL(url);
+			if (url.includes('youtube.com/watch')) {
+				const videoId = urlObj.searchParams.get('v');
+				if (videoId) {
+					url = `https://www.youtube.com/watch?v=${videoId}`;
+				}
+			} else if (url.includes('youtu.be/')) {
+				const videoId = urlObj.pathname.substring(1);
+				if (videoId) {
+					url = `https://www.youtube.com/watch?v=${videoId}`;
+				}
+			}
+		} else {
+			return res.redirect('/download?error=2');
+		}
+
+		console.log('開始處理清理後的網址:', url);
 
 		// 取得影片資訊
 		const { title } = await getVideoInfo(url);
