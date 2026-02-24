@@ -1,3 +1,3 @@
 package-lock.json
 node_modules
-cookies.txt
+cookies.txt\n# Test artifacts\n*.png\n*.mp3\ntest-*.js\nplaywright-test.js
