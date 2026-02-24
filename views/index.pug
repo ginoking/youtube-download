@@ -1,17 +1,42 @@
 extends layout
 block content
-	form(action="download" method="post")
+	form(id="downloadForm" action="download" method="post")
 		.card
 			img(src="/images/youtubelogo.svg", alt="logo", class="youtube-logo")
 			h1= title
 			if error
-				.error 網址有問題啊-.-
+				.error= error
 			else
 				p 簡單下載音樂的專案，呵呵
 				
 			.input
-				textarea.input__field(name="url", type="url", placeholder=" " required)
-				span.input__label(onclick="document.querySelector('textarea').focus();") 輸入Youtube網址 
+				textarea.input__field(id="urlInput", name="url", type="url", placeholder=" ", required, autofocus)
+				span.input__label(onclick="document.getElementById('urlInput').focus();") 輸入Youtube網址 
 				
-			.button-group
+			.loading-container(id="loading" style="display: none;")
+				.spinner
+				p 正在處理並轉碼音訊，請稍候...
+
+			.button-group(id="buttonGroup")
 				button(type="submit") 下載
+
+	script.
+		const form = document.getElementById('downloadForm');
+		const loading = document.getElementById('loading');
+		const buttonGroup = document.getElementById('buttonGroup');
+		const urlInput = document.getElementById('urlInput');
+
+		form.onsubmit = function() {
+			// 顯示轉圈圈，隱藏按鈕
+			loading.style.display = 'block';
+			buttonGroup.style.display = 'none';
+
+			// 因為下載是透過 Content-Disposition 觸發的，頁面不會跳轉
+			// 我們在提交後稍微延遲一下清空輸入框，並恢復按鈕（讓使用者可以下一個）
+			setTimeout(() => {
+				urlInput.value = '';
+				loading.style.display = 'none';
+				buttonGroup.style.display = 'block';
+				urlInput.focus();
+			}, 3000); // 3秒後通常下載已在後台啟動
+		};

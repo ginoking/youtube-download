@@ -5,7 +5,8 @@ const { getVideoInfo, downloadAudio } = require('../lib/youtube');
 router.post('/check', async function (req, res) {
 	const birthday = req.body.birthday;
 
-	if (birthday === process.env.BIRTHDAY) {
+	// 恢復驗證完整的出生年月日
+	if (birthday === '1997-03-26') {
 		req.session.verified = true;
 		return res.redirect('/download');
 	}

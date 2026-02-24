@@ -3,6 +3,9 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
+  if (req.session.verified) {
+    return res.redirect('/download');
+  }
   res.render('check', { error: req.query.error });
 });
 
