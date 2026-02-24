@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "dev": "nodemon ./bin/www"
+    "dev": "nodemon ./bin/www",
+    "test": "jest"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
@@ -16,5 +17,8 @@
     "nodemon": "^3.1.9",
     "playwright": "^1.58.2",
     "pug": "2.0.0-beta11"
+  },
+  "devDependencies": {
+    "jest": "^30.2.0"
   }
 }
