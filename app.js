@@ -1,5 +1,9 @@
 var createError = require('http-errors');
 var express = require('express');
+
+// 忽略 SSL/TLS 憑證檢查 (解決憑證過期或不匹配問題)
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 var session = require('express-session');
 var path = require('path');
 var cookieParser = require('cookie-parser');

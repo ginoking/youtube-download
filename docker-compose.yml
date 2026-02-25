@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    command: npm run dev
+    command: npm start
     tty: true
     ports:
       - "8080:80"
