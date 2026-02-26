@@ -14,13 +14,18 @@
   color: var(--color-text);
   background: var(--color-background);
   font-weight: 300;
-  padding: 0 calc(var(--size-bezel) * 3);
 }
 
 body {
-  padding: 50px;
+  margin: 0;
+  padding: 0;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
   text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  width: 100%;
 }
 
 a {
@@ -28,13 +33,18 @@ a {
 }
 
 .youtube-logo {
-  width: 20%;
+  width: 75%;
+  max-width: 400px;
+  margin-bottom: 2.5rem;
 }
 
 form {
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
+  max-width: 600px;
+  padding: 20px;
 }
 
 textarea {
@@ -42,13 +52,15 @@ textarea {
 }
 
 .card {
-  width: 50%;
+  width: 100%;
   background: var(--color-background);
   padding: calc(4 * var(--size-bezel));
-  margin-top: calc(4 * var(--size-bezel));
   border-radius: var(--size-radius);
   border: 3px solid var(--color-shadow, currentColor);
   box-shadow: 0.5rem 0.5rem 0 var(--color-shadow, currentColor);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .input {
@@ -56,32 +68,33 @@ textarea {
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
 }
 .input__label {
   position: absolute;
-  left: 11.5vw;
-  /* top: 0; */
+  left: 10px;
+  top: 10px;
   padding: calc(var(--size-bezel) * 0.75) calc(var(--size-bezel) * .5);
-  margin: calc(var(--size-bezel) * 0.75 + 3px) calc(var(--size-bezel) * .5);
-  background: pink;
+  background: var(--color-background);
   white-space: nowrap;
   transform: translate(0, 0);
   transform-origin: 0 0;
-  background: var(--color-background);
   transition: transform 120ms ease-in;
   font-weight: bold;
   line-height: 1.2;
+  pointer-events: none;
 }
 .input__field {
   box-sizing: border-box;
   display: block;
-  width: 50%;
-  height: 50px;
+  width: 100%;
+  min-height: 80px;
   border: 3px solid currentColor;
-  padding: calc(var(--size-bezel) * 1.5) var(--size-bezel);
+  padding: calc(var(--size-bezel) * 2.5) var(--size-bezel);
   color: currentColor;
   background: transparent;
   border-radius: var(--size-radius);
+  line-height: 1.5;
 }
 .input__field:not(:-moz-placeholder-shown) + .input__label {
   transform: translate(0.25rem, -65%) scale(0.8);
@@ -141,21 +154,39 @@ button {
 }
 
 @media only screen and (max-width: 768px) {
+  :root {
+    font-size: 14px;
+  }
+
+  body {
+    padding: 10px;
+    box-sizing: border-box;
+  }
+
   .card {
-    width: 100%;
+    width: 95%;
+    padding: calc(2 * var(--size-bezel));
+    box-shadow: 0.25rem 0.25rem 0 var(--color-shadow, currentColor);
   }
 
   .youtube-logo {
-    width: 80%;
+    width: 75%;
+    margin-bottom: 2.5rem;
   }
 
-  .input__field {
-    width: 100%;
+  h1 {
+    font-size: 1.5rem;
   }
 
   .input__label {
-    left: 1vw;
+    left: 10px;
+    font-size: 0.9rem;
   }
 
+  button {
+    width: 100%;
+    padding: 1rem;
+    letter-spacing: 0.1em;
+  }
 }
 

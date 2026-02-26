@@ -1,8 +1,8 @@
 extends layout
 block content
 	form(id="downloadForm" action="download" method="post")
+		img(src="/images/youtubelogo.svg", alt="logo", class="youtube-logo")
 		.card
-			img(src="/images/youtubelogo.svg", alt="logo", class="youtube-logo")
 			h1= title
 			if error
 				.error= error
