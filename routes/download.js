@@ -38,7 +38,7 @@ router.post('/download', async function (req, res) {
 		const safeTitle = title.replace(/[<>:"/\\|?*]/g, '_');
 		const encodedTitle = encodeURIComponent(safeTitle);
 
-		// 關鍵修正：改用 MP3 格式以獲得最強播放相容性
+		// 恢復為音訊類型，前端將透過 Blob 處理下載
 		res.setHeader(
 			'Content-Disposition',
 			`attachment; filename="audio.mp3"; filename*=UTF-8''${encodedTitle}.mp3`

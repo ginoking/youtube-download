@@ -10,7 +10,7 @@ block content
 				p 簡單下載音樂的專案，呵呵
 				
 			.input
-				textarea.input__field(id="urlInput", name="url", type="url", placeholder=" ", required, autofocus)
+				textarea.input__field.input__field--textarea(id="urlInput", name="url", type="url", placeholder=" ", required, autofocus)
 				span.input__label(onclick="document.getElementById('urlInput').focus();") 輸入Youtube網址 
 				
 			.loading-container(id="loading" style="display: none;")
@@ -26,17 +26,57 @@ block content
 		const buttonGroup = document.getElementById('buttonGroup');
 		const urlInput = document.getElementById('urlInput');
 
-		form.onsubmit = function() {
+		form.onsubmit = async function(e) {
+			e.preventDefault(); // 阻止表單原生跳轉
+
 			// 顯示轉圈圈，隱藏按鈕
 			loading.style.display = 'block';
 			buttonGroup.style.display = 'none';
 
-			// 因為下載是透過 Content-Disposition 觸發的，頁面不會跳轉
-			// 我們在提交後稍微延遲一下清空輸入框，並恢復按鈕（讓使用者可以下一個）
-			setTimeout(() => {
+			try {
+				const formData = new URLSearchParams(new FormData(form));
+				const response = await fetch('download', {
+					method: 'POST',
+					body: formData,
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded'
+					}
+				});
+
+				if (!response.ok) throw new Error('下載失敗');
+
+				// 讀取檔名 (從 Content-Disposition 取得)
+				const disposition = response.headers.get('Content-Disposition');
+				let filename = 'audio.mp3';
+				if (disposition && disposition.indexOf('filename*=UTF-8\'\'') !== -1) {
+					filename = decodeURIComponent(disposition.split('filename*=UTF-8\'\'')[1]);
+				}
+
+				// 將回應轉為 Blob
+				const blob = await response.blob();
+				const url = window.URL.createObjectURL(blob);
+				
+				// 建立隱藏連結並點擊觸發下載
+				const a = document.createElement('a');
+				a.style.display = 'none';
+				a.href = url;
+				a.download = filename;
+				document.body.appendChild(a);
+				a.click();
+				
+				// 清理資源
+				window.URL.revokeObjectURL(url);
+				document.body.removeChild(a);
+
+				// 恢復介面
 				urlInput.value = '';
 				loading.style.display = 'none';
 				buttonGroup.style.display = 'block';
 				urlInput.focus();
-			}, 3000); // 3秒後通常下載已在後台啟動
+				
+			} catch (err) {
+				alert('發生錯誤: ' + err.message);
+				loading.style.display = 'none';
+				buttonGroup.style.display = 'block';
+			}
 		};

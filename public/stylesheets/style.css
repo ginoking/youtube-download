@@ -87,14 +87,40 @@ textarea {
 .input__field {
   box-sizing: border-box;
   display: block;
-  width: 100%;
-  min-height: 80px;
   border: 3px solid currentColor;
-  padding: calc(var(--size-bezel) * 2.5) var(--size-bezel);
   color: currentColor;
   background: transparent;
   border-radius: var(--size-radius);
-  line-height: 1.5;
+}
+
+/* 首頁用的網址輸入框 (大字體版) */
+.input__field--textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: calc(var(--size-bezel) * 1.5) var(--size-bezel);
+  line-height: 1.2;
+  font-size: 2.4rem;
+}
+
+/* 生日檢查頁用的日期輸入框 (縮小寬度版) */
+.input__field--date {
+  width: 75%;
+  min-height: 50px;
+  padding: 0 15px;
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* 生日頁標籤專用樣式 (左側懸浮) */
+.input__label--date {
+  left: 12.5% !important; /* 對應 75% 寬度的起始點 */
+  top: 0 !important;
+  transform: translate(10px, -50%) scale(0.8) !important;
+  background: var(--color-background) !important;
+  padding: 0 10px !important;
+  color: var(--color-accent);
+  width: auto !important;
+  text-align: left;
 }
 .input__field:not(:-moz-placeholder-shown) + .input__label {
   transform: translate(0.25rem, -65%) scale(0.8);
@@ -181,6 +207,17 @@ button {
   .input__label {
     left: 10px;
     font-size: 0.9rem;
+  }
+
+  .input__field--textarea {
+    width: 100%;
+    font-size: 1.6rem;
+    min-height: 70px;
+  }
+
+  .input__field--date {
+    width: 90%;
+    font-size: 1rem;
   }
 
   button {

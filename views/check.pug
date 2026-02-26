@@ -6,8 +6,8 @@ block content
             if error
                 .error 欸，太不了解了吧?!
             .input
-                input.input__field(id="birthdayInput", name="birthday", type="date", min="1000-01-01", max="9999-12-31", placeholder=" ", required, autofocus)
-                span.input__label 請輸入阿金的出生西元年
+                input.input__field.input__field--date(id="birthdayInput", name="birthday", type="date", required, autofocus)
+                span.input__label.input__label--date 請輸入阿金的出生西元年
             .button-group
                 button(type="submit") 確認
 
